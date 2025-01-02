@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
-import easyocr
 from pydantic import BaseModel
 import logging
 import os
-from typing import List
+from typing import List, Literal
+from easyocrapi import EasyOCRAPI
+from tesseractapi import TesseractAPI
+from azureocrapi import AzureOCRAPI
 
 # 配置更详细的日志
 logging.basicConfig(
@@ -14,17 +16,15 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-try:
-    # 初始化 EasyOCR reader（支持中英文）
-    logger.info("正在初始化 EasyOCR...")
-    reader = easyocr.Reader(['ch_sim', 'en'])
-    logger.info("EasyOCR 初始化成功")
-except Exception as e:
-    logger.error(f"EasyOCR 初始化失败: {str(e)}")
-    raise
+# 初始化OCR引擎
+easy_ocr = EasyOCRAPI()
+tesseract_ocr = TesseractAPI()
+azure_ocr = AzureOCRAPI()
 
 class ImageRequest(BaseModel):
     image_path: str
+    type: Literal["easyocr", "tesseract", "azure"] = "easyocr"
+    language: str = "en"  # 默认使用英文模式
 
 class OCRResponse(BaseModel):
     status: str
@@ -51,17 +51,14 @@ async def extract_text(request: ImageRequest):
         if file_ext not in valid_extensions:
             raise HTTPException(status_code=400, detail="不支持的图片格式")
         
-        # 读取图片并识别文字
-        logger.debug("开始识别文字...")
-        result = reader.readtext(request.image_path)
+        # 根据type参数选择OCR引擎
+        if request.type == "easyocr":
+            extracted_text = easy_ocr.extract_text(request.image_path)
+        elif request.type == "tesseract":
+            extracted_text = tesseract_ocr.extract_text(request.image_path)
+        else:
+            extracted_text = azure_ocr.extract_text(request.image_path, language=request.language)
         
-        # 提取识别到的文字
-        extracted_text = []
-        for detection in result:
-            text = detection[1]
-            extracted_text.append(text)
-        
-        logger.debug(f"识别结果: {extracted_text}")
         return OCRResponse(
             status="success",
             text=extracted_text
@@ -80,3 +77,7 @@ async def extract_text(request: ImageRequest):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"} 
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000) 
