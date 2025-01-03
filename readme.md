@@ -52,7 +52,7 @@ python -m app.main
 uvicorn app.main:app --reload
 ```
 
-服务将在 http://localhost:8000 启动
+服务将在 http://localhost:8003 启动
 
 ## API 文档
 

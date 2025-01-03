@@ -1,6 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from ...services import AzureOCRAPI, EasyOCRAPI, TesseractAPI
-from ...db.mongodb import db
 from ...core.config import settings
 import os
 import aiofiles
@@ -42,17 +41,6 @@ async def upload_and_ocr(
         else:
             text = easy_ocr.extract_text(file_path)
             
-        # 保存到MongoDB
-        image_doc = {
-            "filename": filename,
-            "file_path": file_path,
-            "upload_time": datetime.utcnow(),
-            "ocr_results": text,
-            "ocr_engine": engine
-        }
-        
-        await db.db.images.insert_one(image_doc)
-        
         return {
             "status": "success",
             "filename": filename,

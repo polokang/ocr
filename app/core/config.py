@@ -7,11 +7,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # MongoDB设置
-    MONGODB_URL: str = "mongodb://localhost:27017"
+    MONGODB_URL: str = "mongodb+srv://aqureporter:ssPVpwiQNw3bBi6m@cluster0.yvch9d8.mongodb.net/"
     MONGODB_DB: str = "ocr_service"
     
     # Azure设置
-    AZURE_KEY: str = "your_key"
+    AZURE_KEY: str = "5BcnQclzVumA5wfS4kyw8gkzt6JqNGMglUizrxnkMVT2SQ5atSfxJQQJ99BAACL93NaXJ3w3AAAFACOGX97g"
     AZURE_ENDPOINT: str = "https://hunter-ocr.cognitiveservices.azure.com/"
     
     # 文件上传设置

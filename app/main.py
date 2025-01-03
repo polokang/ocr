@@ -3,7 +3,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .api.endpoints import ocr
-from .db.mongodb import db
 import os
 
 # 创建必要的目录
@@ -29,10 +28,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # 注册路由
 app.include_router(ocr.router, prefix=settings.API_V1_STR)
 
-@app.on_event("startup")
-async def startup_event():
-    await db.connect_to_mongo()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await db.close_mongo_connection() 
+# 添加健康检查路由
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"} 

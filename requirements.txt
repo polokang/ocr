@@ -8,4 +8,4 @@ pillow
 pytesseract
 azure-cognitiveservices-vision-computervision
 pydantic-settings
-python-dotenv 
+python-dotenv
